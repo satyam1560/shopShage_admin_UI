@@ -1,5 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-
 class ProductModel {
   String title;
   String description;
@@ -33,8 +31,4 @@ class ProductModel {
       productQuantity: map['productQuantity'] as int,
     );
   }
-
-  // String toJson() => json.encode(toMap());
-
-  // factory ProductModel.fromJson(String source) => ProductModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }

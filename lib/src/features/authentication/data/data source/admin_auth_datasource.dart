@@ -1,5 +1,6 @@
-import 'package:ecommerce/src/features/authentication/data/data%20source/models/models.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+import '../models/models.dart';
 
 class GetAdminAuth {
   Future<List<CustomUser>> getAdminAuth() async {

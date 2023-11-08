@@ -22,7 +22,7 @@ class ProductRepository {
   }
 
   Future<String> addProductImage(File imageFile) async {
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    String fileName = '${DateTime.now().millisecondsSinceEpoch.toString()}.jpg';
 
     fStorage.Reference storageRef = fStorage.FirebaseStorage.instance
         .ref()
