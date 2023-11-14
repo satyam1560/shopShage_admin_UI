@@ -1,28 +1,42 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 part of 'display_product_bloc.dart';
 
-abstract class DisplayProductState extends Equatable {
-  const DisplayProductState();
+enum ProductStatus { initial, loading, success, failure }
+
+class ProductState extends Equatable {
+  final ProductStatus productStatus;
+  final List<Product>? products;
+  final Product? product;
+  final String failure;
+  const ProductState({
+    required this.productStatus,
+    required this.products,
+    this.product,
+    required this.failure,
+  });
+
+  ProductState copyWith({
+    ProductStatus? productStatus,
+    List<Product>? products,
+    Product? product,
+    String? failure,
+  }) {
+    return ProductState(
+      productStatus: productStatus ?? this.productStatus,
+      products: products ?? this.products,
+      product: product ?? this.product,
+      failure: failure ?? this.failure,
+    );
+  }
+
+  factory ProductState.inital() => const ProductState(
+        productStatus: ProductStatus.initial,
+        products: [],
+        failure: '',
+      );
 
   @override
-  List<Object?> get props => [];
-}
-// class DisplayProductInitial extends DisplayProductState {}
-
-final class DisplayProductDataInitial extends DisplayProductState {}
-
-final class DisplayProductDataLoading extends DisplayProductState {}
-
-final class DisplayProductDataLoaded extends DisplayProductState {
-  final List<ProductObject> products;
-  const DisplayProductDataLoaded(this.products);
-
+  bool get stringify => true;
   @override
-  List<Object?> get props => [products];
-}
-
-final class DisplayProductDataError extends DisplayProductState {
-  final String error;
-  const DisplayProductDataError(this.error);
-  @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [productStatus, products, product, failure];
 }

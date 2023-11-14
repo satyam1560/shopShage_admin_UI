@@ -2,21 +2,41 @@
 
 import 'dart:convert';
 
-class ProductObject {
-  String id;
-  String title;
-  String description;
-  num productPrice;
-  String productImgUrl;
-  int productQuantity;
-  ProductObject({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.productPrice,
-    required this.productImgUrl,
-    required this.productQuantity,
+import 'package:equatable/equatable.dart';
+
+class Product extends Equatable {
+  String? id;
+  String? title;
+  String? description;
+  num? productPrice;
+  String? productImgUrl;
+  int? productQuantity;
+  Product({
+    this.id,
+    this.title,
+    this.description,
+    this.productPrice,
+    this.productImgUrl,
+    this.productQuantity,
   });
+
+  Product copyWith({
+    String? id,
+    String? title,
+    String? description,
+    num? productPrice,
+    String? productImgUrl,
+    int? productQuantity,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      productPrice: productPrice ?? this.productPrice,
+      productImgUrl: productImgUrl ?? this.productImgUrl,
+      productQuantity: productQuantity ?? this.productQuantity,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
@@ -29,8 +49,8 @@ class ProductObject {
     };
   }
 
-  factory ProductObject.fromMap(Map<String, dynamic> map) {
-    return ProductObject(
+  factory Product.fromMap(Map<String, dynamic> map) {
+    return Product(
       id: map['id'] ?? '',
       title: map['title'] ?? '',
       description: map['description'] ?? '',
@@ -41,6 +61,12 @@ class ProductObject {
   }
   String toJson() => json.encode(toMap());
 
-  factory ProductObject.fromJson(String source) =>
-      ProductObject.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory Product.fromJson(String source) =>
+      Product.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  @override
+  bool get stringify => true;
+  @override
+  List<Object?> get props =>
+      [id, title, description, productPrice, productImgUrl, productQuantity];
 }

@@ -5,12 +5,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../data/datasources/add_product_datasource.dart';
-import '../bloc/add_product_bloc.dart';
+import '../../data/datasources/display_product_datasource.dart';
+import '../../data/models/product_model.dart';
+import '../bloc/display_product_bloc.dart';
 import '../widgets/custom_formfiels.dart';
 
 class ProductCreateScreen extends StatefulWidget {
-  const ProductCreateScreen({super.key});
+  const ProductCreateScreen({Key? key}) : super(key: key);
 
   @override
   _ProductCreateScreenState createState() => _ProductCreateScreenState();
@@ -31,15 +32,18 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
         String downloadUrlImage =
             await ProductRepository().addProductImage(File(imageXFile!.path));
 
-        if (downloadUrlImage != null) {
-          context.read<AddProductBloc>().add(AddProduct(
-                title: titleController.text,
-                description: descriptionController.text,
-                productPrice: double.parse(priceController.text),
-                productImgUrl: downloadUrlImage,
-                productQuantity: int.parse(quantityController.text),
+        if (downloadUrlImage.isNotEmpty) {
+          context.read<ProductBloc>().add(AddProduct(
+                product: Product(
+                  title: titleController.text,
+                  description: descriptionController.text,
+                  productPrice: double.parse(priceController.text),
+                  productImgUrl: downloadUrlImage,
+                  productQuantity: int.parse(quantityController.text),
+                ),
               ));
-          Fluttertoast.showToast(msg: 'Product Added Sucessfully');
+
+          Fluttertoast.showToast(msg: 'Product Added Successfully');
         } else {
           Fluttertoast.showToast(msg: 'Image upload failed');
         }
@@ -49,15 +53,75 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
     }
   }
 
-  getImageFromGallery() async {
+  Future<void> getImageFromGallery() async {
     imageXFile = await _imagePicker.pickImage(
-        source: ImageSource.gallery, imageQuality: 70);
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
     print('imgxfile------$imageXFile');
-
     setState(() {
       imageXFile;
     });
-    _addProductToFirebase;
+    // _addProductToFirebase(context);
+  }
+
+  Widget buildImageSection() {
+    return GestureDetector(
+      onTap: getImageFromGallery,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20.0),
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.40,
+          height: MediaQuery.of(context).size.width * 0.40,
+          color: Colors.white,
+          child: imageXFile == null
+              ? Icon(
+                  Icons.add_photo_alternate,
+                  color: Colors.grey,
+                  size: MediaQuery.of(context).size.width * 0.20,
+                )
+              : Image(
+                  image: FileImage(File(imageXFile!.path)),
+                  fit: BoxFit.cover,
+                ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildFormField({
+    int? maxLines,
+    required bool autofocus,
+    required TextEditingController controller,
+    required String labelText,
+    TextInputType? keyboardType,
+    FormFieldValidator<String>? validator,
+  }) {
+    return CustomFormField(
+      autofocus: autofocus,
+      textEditingController: controller,
+      labelText: labelText,
+      keyboardType: keyboardType,
+      validator: validator,
+      maxLines: maxLines,
+    );
+  }
+
+  Widget buildSubmitButton(bool isSubmitting) {
+    return ElevatedButton(
+      onPressed: isSubmitting ? null : () => _addProductToFirebase(context),
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30),
+        ),
+      ),
+      child: isSubmitting
+          ? const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            )
+          : const Text('Add Product'),
+    );
   }
 
   @override
@@ -66,27 +130,27 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
       appBar: AppBar(
         title: const Text('Add Products'),
       ),
-      body: BlocConsumer<AddProductBloc, AddProductState>(
+      body: BlocConsumer<ProductBloc, ProductState>(
         listener: (context, state) {
-          if (state is AddProductLoadedState) {
+          print('status********${state.productStatus}');
+          if (state.productStatus == ProductStatus.success) {
             titleController.clear();
             descriptionController.clear();
             priceController.clear();
             quantityController.clear();
-
             setState(() {
               imageXFile = null;
             });
-          } else if (state is AddProductErrorState) {
+          } else if (state.productStatus == ProductStatus.failure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.error),
+                content: Text(state.failure),
               ),
             );
           }
         },
         builder: (context, state) {
-          bool isSubmitting = state is AddProductLoadingState;
+          bool isSubmitting = state.productStatus == ProductStatus.loading;
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Form(
@@ -94,32 +158,10 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    GestureDetector(
-                      onTap: () {
-                        getImageFromGallery();
-                      },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(20.0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.40,
-                          height: MediaQuery.of(context).size.width * 0.40,
-                          color: Colors.white,
-                          child: imageXFile == null
-                              ? Icon(
-                                  Icons.add_photo_alternate,
-                                  color: Colors.grey,
-                                  size:
-                                      MediaQuery.of(context).size.width * 0.20,
-                                )
-                              : Image(
-                                  image: FileImage(File(imageXFile!.path)),
-                                  fit: BoxFit.cover),
-                        ),
-                      ),
-                    ),
-                    CustomFormField(
+                    buildImageSection(),
+                    buildFormField(
                       autofocus: true,
-                      textEditingController: titleController,
+                      controller: titleController,
                       labelText: 'Title',
                       validator: (value) {
                         if (value!.isEmpty) {
@@ -131,11 +173,11 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                         return null;
                       },
                     ),
-                    CustomFormField(
-                      maxLines: 10,
+                    buildFormField(
                       autofocus: true,
-                      textEditingController: descriptionController,
+                      controller: descriptionController,
                       labelText: 'Description',
+                      maxLines: 10,
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Please enter a description';
@@ -146,9 +188,9 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                         return null;
                       },
                     ),
-                    CustomFormField(
+                    buildFormField(
                       autofocus: true,
-                      textEditingController: priceController,
+                      controller: priceController,
                       labelText: 'Price',
                       keyboardType: TextInputType.number,
                       validator: (value) {
@@ -162,9 +204,9 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                         return null;
                       },
                     ),
-                    CustomFormField(
+                    buildFormField(
                       autofocus: true,
-                      textEditingController: quantityController,
+                      controller: quantityController,
                       labelText: 'Quantity',
                       keyboardType: TextInputType.number,
                       validator: (value) {
@@ -179,23 +221,7 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                       },
                     ),
                     const SizedBox(height: 50),
-                    ElevatedButton(
-                      onPressed: isSubmitting
-                          ? null
-                          : () => _addProductToFirebase(context),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: isSubmitting
-                          ? const CircularProgressIndicator(
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          : const Text('Add Product'),
-                    ),
+                    buildSubmitButton(isSubmitting),
                     const SizedBox(height: 30),
                   ],
                 ),
