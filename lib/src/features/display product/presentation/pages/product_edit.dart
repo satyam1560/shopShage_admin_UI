@@ -19,12 +19,14 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
+  final TextEditingController sellingPriceController = TextEditingController();
   @override
   void initState() {
     titleController.text = widget.product?.title ?? '';
     descriptionController.text = widget.product?.description ?? '';
     priceController.text = widget.product?.productPrice?.toString() ?? '';
-
+    sellingPriceController.text =
+        widget.product?.sellingPrice?.toString() ?? '0';
     quantityController.text = widget.product?.productQuantity.toString() ?? '';
     super.initState();
   }
@@ -84,7 +86,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
                 buildFormField(
                   autofocus: true,
                   controller: priceController,
-                  labelText: 'Price',
+                  labelText: 'MRP',
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -92,6 +94,22 @@ class _EditProductScreenState extends State<EditProductScreen> {
                     }
                     final double price = double.tryParse(value) ?? -1;
                     if (price <= 0) {
+                      return 'Please enter a valid, positive price';
+                    }
+                    return null;
+                  },
+                ),
+                buildFormField(
+                  autofocus: true,
+                  controller: sellingPriceController,
+                  labelText: 'Selling Price',
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter a price';
+                    }
+                    final double sellingPrice = double.tryParse(value) ?? -1;
+                    if (sellingPrice <= 0) {
                       return 'Please enter a valid, positive price';
                     }
                     return null;
@@ -123,6 +141,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       description: descriptionController.text,
                       productPrice: double.tryParse(priceController.text),
                       productQuantity: int.tryParse(quantityController.text),
+                      sellingPrice:
+                          double.tryParse(sellingPriceController.text),
                     );
                     context
                         .read<ProductBloc>()

@@ -42,15 +42,28 @@ class ProductDetailScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Displays the product price.
-                        Text(
-                          '₹ ${(product.productPrice) as double}',
-                          style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '₹ ${(product.productPrice) as double}',
+                              style: const TextStyle(
+                                decoration: TextDecoration.lineThrough,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 162, 162, 163),
+                              ),
+                            ),
+                            Text(
+                              '₹ ${double.parse(product.sellingPrice.toString())}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 25,
+                                color: Colors.deepPurple,
+                              ),
+                            ),
+                          ],
                         ),
                         const Spacer(),
-                        // Add to Cart button.
                         Column(
                           children: [
                             CustomButton(
@@ -65,7 +78,7 @@ class ProductDetailScreen extends StatelessWidget {
                                 context
                                     .read<ProductBloc>()
                                     .add(DeleteProduct(id: product));
-                                print('****${product.id}');
+
                                 Navigator.pop(context);
                               },
                               textColor:
@@ -98,17 +111,7 @@ class ProductDetailScreen extends StatelessWidget {
                 Positioned(
                   // Aligns the discount tag to the top right of the product card.
                   right: 0,
-                  child: CustomButton(
-                    // Styling for the discount tag button.
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-                    // Text to display the discount percentage.
-                    text: '10.45%',
-                    // Background color for the discount tag.
-                    backgroundColor: const Color.fromARGB(238, 243, 176, 43),
-                    // Text color for the discount tag.
-                    textColor: Colors.white,
-                  ),
+                  child: buildDiscountTag(product),
                 ),
 // The stack allows overlaying of the discount tag over the product card.
               ],
@@ -118,4 +121,24 @@ class ProductDetailScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget buildDiscountTag(Product product) {
+  final originalPrice = product.productPrice as num;
+  final discountedPrice = product.sellingPrice as num;
+
+  final discount = (originalPrice - discountedPrice) / originalPrice;
+  final discountPercentage =
+      (discount * 100).ceil(); // Format to two decimal places
+
+  return CustomButton(
+    // Styling for the discount tag button.
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+    // Text to display the discount percentage.
+    text: '$discountPercentage%',
+    // Background color for the discount tag.
+    backgroundColor: const Color.fromARGB(238, 243, 176, 43),
+    // Text color for the discount tag.
+    textColor: Colors.white,
+  );
 }

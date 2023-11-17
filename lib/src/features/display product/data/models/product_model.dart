@@ -11,6 +11,7 @@ class Product extends Equatable {
   num? productPrice;
   String? productImgUrl;
   int? productQuantity;
+  num? sellingPrice;
   Product({
     this.id,
     this.title,
@@ -18,6 +19,7 @@ class Product extends Equatable {
     this.productPrice,
     this.productImgUrl,
     this.productQuantity,
+    this.sellingPrice,
   });
 
   Product copyWith({
@@ -27,6 +29,7 @@ class Product extends Equatable {
     num? productPrice,
     String? productImgUrl,
     int? productQuantity,
+    num? sellingPrice,
   }) {
     return Product(
       id: id ?? this.id,
@@ -35,6 +38,7 @@ class Product extends Equatable {
       productPrice: productPrice ?? this.productPrice,
       productImgUrl: productImgUrl ?? this.productImgUrl,
       productQuantity: productQuantity ?? this.productQuantity,
+      sellingPrice: sellingPrice ?? this.sellingPrice,
     );
   }
 
@@ -46,6 +50,7 @@ class Product extends Equatable {
       'productPrice': productPrice,
       'productImgUrl': productImgUrl,
       'productQuantity': productQuantity,
+      'sellingPrice': sellingPrice,
     };
   }
 
@@ -56,7 +61,8 @@ class Product extends Equatable {
       description: map['description'] ?? '',
       productPrice: map['productPrice'] ?? '',
       productImgUrl: map['productImgUrl'] ?? '',
-      productQuantity: map['productQuantity'] ?? '',
+      productQuantity: map['productQuantity'] ?? '0',
+      sellingPrice: map['sellingPrice'] ?? 0,
     );
   }
   String toJson() => json.encode(toMap());
@@ -67,6 +73,13 @@ class Product extends Equatable {
   @override
   bool get stringify => true;
   @override
-  List<Object?> get props =>
-      [id, title, description, productPrice, productImgUrl, productQuantity];
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        productPrice,
+        productImgUrl,
+        productQuantity,
+        sellingPrice
+      ];
 }

@@ -101,7 +101,7 @@ class _ProductState extends State<DisplayProduct> {
               buildProductCardContent(product),
               Positioned(
                 right: 0,
-                child: buildDiscountTag(),
+                child: buildDiscountTag(product),
               ),
             ],
           ),
@@ -114,33 +114,45 @@ class _ProductState extends State<DisplayProduct> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.network(
-          product.productImgUrl!,
-          fit: BoxFit.cover,
+        SizedBox(
+          height: 150,
+          child: Image.network(
+            product.productImgUrl!,
+            fit: BoxFit.fitWidth,
+          ),
         ),
         const Spacer(),
         Text(product.title!, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 10),
-        Row(
-          children: [
-            Text(
-              '₹ ${(product.productPrice) as double}',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-            ),
-            const Spacer(),
-          ],
+        Text(
+          '₹ ${double.parse(product.productPrice.toString())}',
+          style: const TextStyle(
+            decoration: TextDecoration.lineThrough,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 162, 162, 163),
+          ),
         ),
+        Text(
+          '₹ ${double.parse(product.sellingPrice.toString())}',
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.deepPurple,
+          ),
+        ),
+        // const Spacer(),
       ],
     );
   }
 
-  Widget buildDiscountTag() {
+  Widget buildDiscountTag(Product product) {
+    final originalPrice = product.productPrice as num;
+    final discountedPrice = product.sellingPrice as num;
+
+    final discount = (originalPrice - discountedPrice) / originalPrice;
+    final discountPercentage = (discount * 100).ceil();
     return CustomButton(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
-      text: '10.45%',
+      text: '$discountPercentage%',
       backgroundColor: const Color.fromARGB(238, 243, 176, 43),
       textColor: Colors.white,
     );

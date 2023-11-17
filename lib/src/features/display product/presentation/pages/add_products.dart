@@ -23,6 +23,7 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
+  final TextEditingController sellingPriceController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   XFile? imageXFile;
 
@@ -40,6 +41,7 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                   productPrice: double.parse(priceController.text),
                   productImgUrl: downloadUrlImage,
                   productQuantity: int.parse(quantityController.text),
+                  sellingPrice: double.parse(sellingPriceController.text),
                 ),
               ));
 
@@ -138,6 +140,7 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
             descriptionController.clear();
             priceController.clear();
             quantityController.clear();
+            sellingPriceController.clear;
             setState(() {
               imageXFile = null;
             });
@@ -191,7 +194,7 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                     buildFormField(
                       autofocus: true,
                       controller: priceController,
-                      labelText: 'Price',
+                      labelText: 'MRP',
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -199,6 +202,23 @@ class _ProductCreateScreenState extends State<ProductCreateScreen> {
                         }
                         final double price = double.tryParse(value) ?? -1;
                         if (price <= 0) {
+                          return 'Please enter a valid, positive price';
+                        }
+                        return null;
+                      },
+                    ),
+                    buildFormField(
+                      autofocus: true,
+                      controller: sellingPriceController,
+                      labelText: 'Selling Price',
+                      keyboardType: TextInputType.number,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a price';
+                        }
+                        final double sellingPrice =
+                            double.tryParse(value) ?? -1;
+                        if (sellingPrice <= 0) {
                           return 'Please enter a valid, positive price';
                         }
                         return null;
